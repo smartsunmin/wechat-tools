@@ -213,11 +213,18 @@
                     continue;
                 }
                 
-                // 三级标题
+                // 三级标题 - 支持 ### 1标题 格式（不显示圆形）
                 if (line.startsWith('### ')) {
                     if (inParagraph) { html += '</p>'; inParagraph = false; }
-                    const title = line.substring(4);
-                    html += `<h3 style="font-size: 16px; font-weight: bold; margin: 25px 0 12px; color: #576b95;">${title}</h3>`;
+                    const content = line.substring(4);
+                    // 检查是否以数字开头
+                    const match = content.match(/^(\d+)\s*(.+)$/);
+                    if (match) {
+                        const title = match[2];
+                        html += `<h3 style="font-size: 16px; font-weight: bold; margin: 25px 0 12px; color: #576b95;">${title}</h3>`;
+                    } else {
+                        html += `<h3 style="font-size: 16px; font-weight: bold; margin: 25px 0 12px; color: #576b95;">${content}</h3>`;
+                    }
                     continue;
                 }
                 
