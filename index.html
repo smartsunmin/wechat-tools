@@ -238,6 +238,17 @@
                     continue;
                 }
                 
+                // 三级标题
+                if (line.startsWith('### ')) {
+                    if (inParagraph) {
+                        html += '</p>';
+                        inParagraph = false;
+                    }
+                    const title = line.substring(4);
+                    html += `<h3 style="font-size: 16px; font-weight: bold; color: #333; margin: 25px 0 12px; color: #576b95;">${title}</h3>`;
+                    continue;
+                }
+                
                 // 二级标题
                 if (line.startsWith('## ')) {
                     if (inParagraph) {
@@ -271,8 +282,8 @@
                     continue;
                 }
                 
-                // 章节数字
-                if (/^\d+$/.test(line) && line.length <= 2) {
+                // 章节数字（单独一行，1-2位数字，后面没有中文内容）
+                if (/^\d{1,2}$/.test(line) && !inParagraph) {
                     if (inParagraph) {
                         html += '</p>';
                         inParagraph = false;
