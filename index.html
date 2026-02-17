@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Markdown 转微信排版工具 - 所见即所得版</title>
+    <title>Markdown 转微信排版工具</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
@@ -72,14 +72,12 @@
             background: #e8e8e8;
             padding: 20px;
         }
-        /* 预览区域样式 */
         .wechat-preview {
             max-width: 677px;
             margin: 0 auto;
             background: #fff;
             padding: 25px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            user-select: all;
         }
         .toolbar {
             padding: 12px 20px;
@@ -138,35 +136,27 @@
 
 正文第一段...
 
-## 小标题一
-
-1
+## 1少爷
 
 第一节内容...
 
-## 小标题二
+## 2相识
 
-2
-
-第二节内容...
-
----
-
-**作者简介：** 作者介绍"># 陈宝莲：请替我打电话给少爷
+第二节内容..."># 陈宝莲：请替我打电话给少爷
 
 > 茨威格写过这样一句话："所有命运赠送的礼物，早已在暗中标好了价格"
 
-无意中刷到胥渡吧制作的《那些已经离我们而去的演员》，视频 1 分 10 秒处赫然出现了这样的字幕：陈宝莲（1973.5.23-2002.7.31）
+无意中刷到胥渡吧制作的《那些已经离我们而去的演员》...
 
-## 少爷
+## 1少爷
 
-第一眼看到黄任中的照片，我是惊叹的："这得有多大的魅力"才能让一个女人如此...
+第一眼看到黄任中的照片，我是惊叹的...
 
-## 相识
+## 2相识
 
-1992 年，19 岁的陈宝莲在台湾宣传电影的时候，在一个饭局上认识了黄任中。
+1992 年，19 岁的陈宝莲在台湾宣传电影...
 
-## 幻灭
+## 3幻灭
 
 陈宝莲 4 岁的时候，父母离婚...
 
@@ -175,7 +165,6 @@
 **作者简介：** 这里是作者简介</textarea>
             <div class="toolbar">
                 <button class="btn btn-secondary" onclick="clearInput()">清空</button>
-                <button class="btn btn-primary" onclick="copyContent()">📋 复制排版内容</button>
             </div>
         </div>
         
@@ -190,23 +179,23 @@
         </div>
     </div>
 
+    <textarea id="copyBuffer" style="position: fixed; left: -9999px; top: -9999px;"></textarea>
+
     <script>
         const markdownInput = document.getElementById('markdownInput');
         const preview = document.getElementById('preview');
+        const copyBuffer = document.getElementById('copyBuffer');
         
-        // 生成带内联样式的 HTML
-        function generateStyledHTML(text) {
+        function generateHTML(text) {
             if (!text.trim()) return '<div style="text-align: center; color: #999; padding: 60px 20px;"><p>输入 Markdown 开始预览</p></div>';
             
             const lines = text.split('\n');
             let html = '';
             let inParagraph = false;
-            let isFirstParagraph = true;
             
             for (let i = 0; i < lines.length; i++) {
                 let line = lines[i].trim();
                 
-                // 跳过空行
                 if (!line) {
                     if (inParagraph) {
                         html += '</p>';
@@ -215,80 +204,52 @@
                     continue;
                 }
                 
-                // 标题
+                // 大标题
                 if (line.startsWith('# ')) {
-                    if (inParagraph) {
-                        html += '</p>';
-                        inParagraph = false;
-                    }
+                    if (inParagraph) { html += '</p>'; inParagraph = false; }
                     const title = line.substring(2);
                     html += `<h1 style="font-size: 24px; font-weight: bold; color: #333; line-height: 1.4; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee;">${title}</h1>`;
-                    
-                    // 自动添加作者信息
-                    html += `
-                        <div style="display: flex; align-items: center; margin-bottom: 25px; padding: 12px; background: #f9f9f9; border-radius: 8px;">
-                            <div style="width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; margin-right: 12px;">作</div>
-                            <div>
-                                <div style="font-size: 15px; color: #576b95; font-weight: 500;">作者名称</div>
-                                <div style="font-size: 13px; color: #999; margin-top: 4px;">${new Date().toLocaleDateString()}</div>
-                            </div>
-                        </div>
-                    `;
-                    isFirstParagraph = true;
+                    html += `<div style="display: flex; align-items: center; margin-bottom: 25px; padding: 12px; background: #f9f9f9; border-radius: 8px;"><div style="width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; margin-right: 12px;">作</div><div><div style="font-size: 15px; color: #576b95; font-weight: 500;">作者名称</div><div style="font-size: 13px; color: #999; margin-top: 4px;">${new Date().toLocaleDateString()}</div></div></div>`;
                     continue;
                 }
                 
                 // 三级标题
                 if (line.startsWith('### ')) {
-                    if (inParagraph) {
-                        html += '</p>';
-                        inParagraph = false;
-                    }
+                    if (inParagraph) { html += '</p>'; inParagraph = false; }
                     const title = line.substring(4);
-                    html += `<h3 style="font-size: 16px; font-weight: bold; color: #333; margin: 25px 0 12px; color: #576b95;">${title}</h3>`;
+                    html += `<h3 style="font-size: 16px; font-weight: bold; margin: 25px 0 12px; color: #576b95;">${title}</h3>`;
                     continue;
                 }
                 
-                // 二级标题
+                // 二级标题 - 支持 ## 1标题 格式
                 if (line.startsWith('## ')) {
-                    if (inParagraph) {
-                        html += '</p>';
-                        inParagraph = false;
+                    if (inParagraph) { html += '</p>'; inParagraph = false; }
+                    const content = line.substring(3);
+                    // 检查是否以数字开头
+                    const match = content.match(/^(\d+)\s*(.+)$/);
+                    if (match) {
+                        const num = match[1];
+                        const title = match[2];
+                        html += `<div style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: #333; color: #fff; border-radius: 50%; font-size: 14px; font-weight: bold; margin: 20px 10px 15px 0; font-family: Georgia, serif;">${num}</div>`;
+                        html += `<h2 style="font-size: 18px; font-weight: bold; color: #333; margin: 20px 0 15px; padding-bottom: 8px; border-bottom: 2px solid #333; display: inline-block;">${title}</h2>`;
+                    } else {
+                        html += `<h2 style="font-size: 18px; font-weight: bold; color: #333; margin: 30px 0 15px; padding-bottom: 8px; border-bottom: 2px solid #333; display: inline-block;">${content}</h2>`;
                     }
-                    const title = line.substring(3);
-                    html += `<h2 style="font-size: 18px; font-weight: bold; color: #333; margin: 30px 0 15px; padding-bottom: 8px; border-bottom: 2px solid #333; display: inline-block;">${title}</h2>`;
                     continue;
                 }
                 
                 // 引用
                 if (line.startsWith('> ')) {
-                    if (inParagraph) {
-                        html += '</p>';
-                        inParagraph = false;
-                    }
+                    if (inParagraph) { html += '</p>'; inParagraph = false; }
                     const quote = line.substring(2);
                     html += `<blockquote style="border-left: 4px solid #07c160; padding: 15px 20px; margin: 20px 0; background: #f8f9fa; color: #555; font-style: italic;"><p style="margin: 0; text-indent: 0;">${quote}</p></blockquote>`;
-                    isFirstParagraph = false;
                     continue;
                 }
                 
                 // 分隔线
                 if (line === '---') {
-                    if (inParagraph) {
-                        html += '</p>';
-                        inParagraph = false;
-                    }
+                    if (inParagraph) { html += '</p>'; inParagraph = false; }
                     html += '<hr style="border: none; height: 1px; background: #ddd; margin: 25px 0;">';
-                    continue;
-                }
-                
-                // 章节数字（单独一行，1-2位数字，后面没有中文内容）
-                if (/^\d{1,2}$/.test(line) && !inParagraph) {
-                    if (inParagraph) {
-                        html += '</p>';
-                        inParagraph = false;
-                    }
-                    html += `<div style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; background: #333; color: #fff; border-radius: 50%; font-size: 14px; font-weight: bold; margin: 15px 0; font-family: Georgia, serif;">${line}</div>`;
                     continue;
                 }
                 
@@ -296,43 +257,27 @@
                 if (!inParagraph) {
                     html += '<p style="font-size: 17px; line-height: 1.9; color: #333; margin-bottom: 18px; text-align: justify; text-indent: 2em;">';
                     inParagraph = true;
-                    if (isFirstParagraph && !line.startsWith('**')) {
-                        isFirstParagraph = false;
-                    }
                 } else {
                     html += '<br>';
                 }
                 
                 // 处理加粗
                 line = line.replace(/\*\*(.+?)\*\*/g, '<strong style="color: #000; font-weight: bold;">$1</strong>');
-                
                 html += line;
             }
             
-            if (inParagraph) {
-                html += '</p>';
-            }
+            if (inParagraph) html += '</p>';
             
-            // 添加底部
-            html += `
-                <div style="margin-top: 35px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;">
-                    <div style="font-size: 14px; color: #666; margin-bottom: 12px;">— END —</div>
-                    <div style="font-size: 14px; color: #576b95; font-weight: 500;">👇 喜欢这篇文章，点个「在看」支持一下</div>
-                </div>
-            `;
+            html += `<div style="margin-top: 35px; padding-top: 20px; border-top: 1px solid #eee; text-align: center;"><div style="font-size: 14px; color: #666; margin-bottom: 12px;">— END —</div><div style="font-size: 14px; color: #576b95; font-weight: 500;">👇 喜欢这篇文章，点个「在看」支持一下</div></div>`;
             
             return html;
         }
         
         function convert() {
-            const text = markdownInput.value;
-            preview.innerHTML = generateStyledHTML(text);
+            preview.innerHTML = generateHTML(markdownInput.value);
         }
         
-        // 实时转换
         markdownInput.addEventListener('input', convert);
-        
-        // 初始化
         convert();
         
         function clearInput() {
@@ -340,33 +285,44 @@
             convert();
         }
         
-        // 复制内容（使用 Clipboard API 复制富文本）
-        async function copyContent() {
+        // 可靠的复制功能
+        function copyContent() {
             const content = preview.innerHTML;
             
+            // 方法1：使用 textarea 复制
+            copyBuffer.value = content;
+            copyBuffer.select();
+            copyBuffer.setSelectionRange(0, 999999);
+            
             try {
-                // 创建 Blob 用于复制富文本
-                const blob = new Blob([content], { type: 'text/html' });
-                const clipboardItem = new ClipboardItem({ 'text/html': blob });
-                await navigator.clipboard.write([clipboardItem]);
-                alert('✅ 排版内容已复制！\n\n现在可以直接粘贴到微信公众号编辑器了。');
-            } catch (err) {
-                // 降级方案：使用传统方式
-                const range = document.createRange();
-                range.selectNode(preview);
-                const selection = window.getSelection();
-                selection.removeAllRanges();
-                selection.addRange(range);
-                
-                try {
-                    document.execCommand('copy');
-                    alert('✅ 排版内容已复制！\n\n现在可以直接粘贴到微信公众号编辑器了。');
-                } catch (e) {
-                    alert('❌ 复制失败，请手动选中右侧预览内容，按 Ctrl+C 复制');
+                const success = document.execCommand('copy');
+                if (success) {
+                    alert('✅ 已复制！请直接粘贴到微信公众号编辑器');
+                    return;
                 }
-                
-                selection.removeAllRanges();
+            } catch (e) {}
+            
+            // 方法2：使用 Clipboard API
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(content).then(() => {
+                    alert('✅ 已复制！请直接粘贴到微信公众号编辑器');
+                }).catch(() => {
+                    manualCopy();
+                });
+            } else {
+                manualCopy();
             }
+        }
+        
+        function manualCopy() {
+            // 方法3：让用户手动选择复制
+            const range = document.createRange();
+            range.selectNodeContents(preview);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            
+            alert('内容已选中，请按 Ctrl+C (或 Cmd+C) 复制');
         }
     </script>
 </body>
